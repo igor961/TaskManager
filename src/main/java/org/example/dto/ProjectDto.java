@@ -1,14 +1,19 @@
-package org.example.entities;
+package org.example.dto;
 
 import java.io.Serializable;
 import java.util.Objects;
 
-public class Project implements Serializable {
+public class ProjectDto implements Serializable {
     public final long id;
     public final String name;
 
-    public Project(long id, String name) {
+    public ProjectDto(long id, String name) {
         this.id = id;
+        this.name = name;
+    }
+
+    public ProjectDto(String name) {
+        this.id = 0;
         this.name = name;
     }
 
@@ -24,7 +29,7 @@ public class Project implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Project project = (Project) o;
+        ProjectDto project = (ProjectDto) o;
         return id == project.id &&
                 Objects.equals(name, project.name);
     }

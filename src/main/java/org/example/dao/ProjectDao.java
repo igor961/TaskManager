@@ -1,9 +1,8 @@
 package org.example.dao;
 
+import org.example.dto.ProjectDto;
+import org.example.dto.mappers.ModelMapper;
 import org.example.entities.Project;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.data.redis.core.HashOperations;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -13,74 +12,70 @@ import org.springframework.stereotype.Repository;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Repository
-public class ProjectDao implements BasicDao<Project> {
+public class ProjectDao implements BasicDao<ProjectDto> {
     private final JdbcTemplate jdbcTemplate;
-    private final HashOperations<String, Integer, Project> hashOperations;
 
     private final RowMapper<Project> rowMapper = (rs, i) ->
             new Project(rs.getInt("id"), rs.getString("name"));
 
-    public ProjectDao(JdbcTemplate jdbcTemplate, RedisTemplate redisTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.hashOperations = redisTemplate.opsForHash();
-    }
-
-    @Override
-    public Optional<Project> get(int id) {
-        return Optional.ofNullable((Project) hashOperations.get("project", id)).or(() -> {
-            try {
-                Project res = jdbcTemplate.queryForObject(
-                        "SELECT * from projects WHERE id = ?;",
-                        new Object[]{id},
-                        new int[]{Types.INTEGER},
-                        rowMapper);
-                if (res != null) hashOperations.put("project", id, res);
-                return Optional.ofNullable(res);
-            } catch (EmptyResultDataAccessException e) {
-                System.out.println(e.getMessage());
-            }
-            return Optional.empty();
-        });
-    }
-
-    @Override
-    public List<Project> getAll() {
-        List<Project> res = hashOperations.values("projects");
-        if (res.isEmpty()) {
-            res = jdbcTemplate.query("SELECT * from projects;", rowMapper);
-            res.forEach(p -> hashOperations.put("project", p.id, p));
+    private final ModelMapper<Project, ProjectDto> modelMapper = new ModelMapper<>() {
+        @Override
+        public ProjectDto getDto(Project project) {
+            return new ProjectDto(project.id, project.name);
         }
-        return res;
+
+        @Override
+        public Project getEntity(ProjectDto projectDto) {
+            return new Project(projectDto.id, projectDto.name);
+        }
+    };
+
+    public ProjectDao(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
-    public Project save(Project project) {
+    public Optional<ProjectDto> get(int id) {
+        Project res = jdbcTemplate.queryForObject(
+                "SELECT * from projects WHERE id = ?;",
+                new Object[]{id},
+                new int[]{Types.INTEGER},
+                rowMapper);
+        return Optional.ofNullable(modelMapper.getDto(res));
+    }
+
+    @Override
+    public List<ProjectDto> getAll() {
+        return jdbcTemplate.query("SELECT * from projects;", rowMapper)
+                .stream()
+                .map(modelMapper::getDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public ProjectDto save(ProjectDto project) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(con -> {
             PreparedStatement ps = con.prepareStatement("INSERT INTO projects (name) VALUES (?);", Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, project.name);
             return ps;
         }, keyHolder);
-        Project res = new Project((int) keyHolder.getKeys().get("id"), project.name);
-        hashOperations.put("project", res.id, res);
-        return res;
+        return new ProjectDto((int) keyHolder.getKeys().get("id"), project.name);
     }
 
     @Override
-    public Project update(Project project) {
-        hashOperations.delete("project", project.id);
-        hashOperations.put("project", project.id, project);
+    public void update(ProjectDto project) {
         jdbcTemplate.update("UPDATE projects SET name = ? WHERE id = ?;", project.name, project.id);
-        return project;
     }
 
     @Override
     public void delete(int id) {
-        hashOperations.delete("project", id);
         jdbcTemplate.update("DELETE FROM projects WHERE id = ?;", id);
     }
 }

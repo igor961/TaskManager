@@ -1,5 +1,6 @@
 package org.example.dao;
 
+import org.example.dto.ProjectDto;
 import org.example.entities.Project;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +22,9 @@ public class ProjectDaoTest {
     public void save() {
         String name = "test3";
         long expectedQ = dao.getAll().stream().filter(e -> e.name.equals(name)).count() + 1;
-        Project p = new Project(0, name);
+        ProjectDto p = new ProjectDto(name);
         dao.save(p);
-        List<Project> aux = dao.getAll();
+        List<ProjectDto> aux = dao.getAll();
         long realQ = aux.stream().filter(e -> e.name.equals(name)).count();
         System.out.println(aux.get(aux.size()-1));
         assertEquals(expectedQ, realQ);
@@ -31,21 +32,22 @@ public class ProjectDaoTest {
 
     @Test
     public void getById() {
-        Project res = dao.get(40).get();
+        ProjectDto res = dao.get(40).get();
         System.out.println(res);
         assertThat(res).isNotNull();
     }
 
     @Test
     public void getAll() {
-        List<Project> res = dao.getAll();
+        List<ProjectDto> res = dao.getAll();
         assertThat(res).isNotNull();
+        assertThat(res).isNotEmpty();
     }
 
     @Test
     public void update() {
         int id = 42;
-        dao.update(new Project(id, "newName"));
+        dao.update(new ProjectDto(id, "newName"));
         assertEquals("newName", dao.get(id).get().name);
     }
 

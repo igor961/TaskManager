@@ -1,6 +1,6 @@
 package org.example.dao;
 
-import org.example.entities.Project;
+import org.example.dto.ProjectDto;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -10,9 +10,9 @@ public interface BasicDao<T> {
 
     Collection<T> getAll();
 
-    Project save(T t);
+    T save(T t);
 
-    Project update(T t);
+    void update(T t);
 
     void delete(int id);
 }
