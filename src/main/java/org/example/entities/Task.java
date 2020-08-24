@@ -7,13 +7,13 @@ public class Task implements Serializable {
     public final long id;
     public final String name;
     public final Boolean status;
-    public final long projecId;
+    public final long projectId;
 
     public Task(long id, String name, Boolean status, long projectId) {
         this.id = id;
         this.name = name;
         this.status = status;
-        this.projecId = projectId;
+        this.projectId = projectId;
     }
 
     @Override
@@ -22,7 +22,7 @@ public class Task implements Serializable {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", status=" + status +
-                ", projecId=" + projecId +
+                ", projecId=" + projectId +
                 '}';
     }
 
@@ -32,13 +32,13 @@ public class Task implements Serializable {
         if (o == null || getClass() != o.getClass()) return false;
         Task task = (Task) o;
         return id == task.id &&
-                projecId == task.projecId &&
+                projectId == task.projectId &&
                 Objects.equals(name, task.name) &&
                 Objects.equals(status, task.status);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, status, projecId);
+        return Objects.hash(id, name, status, projectId);
     }
 }
