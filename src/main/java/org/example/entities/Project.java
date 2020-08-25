@@ -25,12 +25,11 @@ public class Project implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Project project = (Project) o;
-        return id == project.id &&
-                Objects.equals(name, project.name);
+        return id == project.id;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name);
+        return Objects.hash(id);
     }
 }

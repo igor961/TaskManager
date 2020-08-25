@@ -6,7 +6,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 public interface BasicDao<T> {
-    Optional<T> get(int id);
+    Optional<T> get(long id);
 
     Collection<T> getAll();
 

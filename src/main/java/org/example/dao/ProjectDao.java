@@ -12,7 +12,6 @@ import org.springframework.stereotype.Repository;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.Types;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -21,29 +20,28 @@ import java.util.stream.Collectors;
 public class ProjectDao implements BasicDao<ProjectDto> {
     private final JdbcTemplate jdbcTemplate;
 
-    private final RowMapper<Project> rowMapper = (rs, i) ->
-            new Project(rs.getInt("id"), rs.getString("name"));
+    private final RowMapper<Project> rowMapper = (rs, i) -> new Project(
+            rs.getLong("project_id"),
+            rs.getString("name"));
 
-    private final ModelMapper<Project, ProjectDto> modelMapper = new ModelMapper<>() {
-        @Override
-        public ProjectDto getDto(Project project) {
-            return new ProjectDto(project.id, project.name);
-        }
-
-        @Override
-        public Project getEntity(ProjectDto projectDto) {
-            return new Project(projectDto.id, projectDto.name);
-        }
-    };
+    private final ModelMapper<Project, ProjectDto> modelMapper = (Project project) -> new ProjectDto(project.id, project.name);
 
     public ProjectDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    public List<ProjectDto> getProjectsWithTasks() {
+        return jdbcTemplate.query("SELECT p.id, p.name, json_agg(t.*) as tasks FROM tasks t INNER JOIN projects p ON p.id = t.project_id GROUP BY p.id, p.name;",
+                (rs, i) -> new ProjectDto(
+                        rs.getLong("id"),
+                        rs.getString("name"),
+                        rs.getString("tasks")));
+    }
+
     @Override
-    public Optional<ProjectDto> get(int id) {
+    public Optional<ProjectDto> get(long id) {
         Project res = jdbcTemplate.queryForObject(
-                "SELECT * from projects WHERE id = ?;",
+                "SELECT id as project_id, name from projects WHERE id = ?;",
                 new Object[]{id},
                 new int[]{Types.INTEGER},
                 rowMapper);
@@ -52,7 +50,7 @@ public class ProjectDao implements BasicDao<ProjectDto> {
 
     @Override
     public List<ProjectDto> getAll() {
-        return jdbcTemplate.query("SELECT * from projects;", rowMapper)
+        return jdbcTemplate.query("SELECT id as project_id, name from projects;", rowMapper)
                 .stream()
                 .map(modelMapper::getDto)
                 .collect(Collectors.toList());
@@ -66,7 +64,7 @@ public class ProjectDao implements BasicDao<ProjectDto> {
             ps.setString(1, project.name);
             return ps;
         }, keyHolder);
-        return new ProjectDto((int) keyHolder.getKeys().get("id"), project.name);
+        return new ProjectDto((long) keyHolder.getKeys().get("id"), project.name);
     }
 
     @Override

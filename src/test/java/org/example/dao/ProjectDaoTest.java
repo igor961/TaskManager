@@ -1,7 +1,6 @@
 package org.example.dao;
 
 import org.example.dto.ProjectDto;
-import org.example.entities.Project;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -56,5 +55,10 @@ public class ProjectDaoTest {
         int id = 41;
         dao.delete(id);
         assertThat(dao.get(id)).isNotPresent();
+    }
+
+    @Test
+    void getProjectsWithTasks() {
+        dao.getProjectsWithTasks().stream().forEach(System.out::println);
     }
 }
