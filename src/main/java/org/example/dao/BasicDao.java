@@ -1,7 +1,5 @@
 package org.example.dao;
 
-import org.example.dto.ProjectDto;
-
 import java.util.Collection;
 import java.util.Optional;
 
