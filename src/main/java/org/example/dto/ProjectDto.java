@@ -1,11 +1,14 @@
 package org.example.dto;
 
+import com.fasterxml.jackson.annotation.JsonRawValue;
+
 import java.io.Serializable;
 import java.util.Objects;
 
 public class ProjectDto implements Serializable {
     public final long id;
     public final String name;
+    @JsonRawValue
     public final String tasks;
 
     public ProjectDto(long id, String name) {
