@@ -64,7 +64,7 @@ public class ProjectDao implements BasicDao<ProjectDto> {
             ps.setString(1, project.name);
             return ps;
         }, keyHolder);
-        return new ProjectDto((long) keyHolder.getKeys().get("id"), project.name);
+        return new ProjectDto(Long.parseLong(keyHolder.getKeys().get("id").toString()), project.name);
     }
 
     @Override
@@ -73,7 +73,7 @@ public class ProjectDao implements BasicDao<ProjectDto> {
     }
 
     @Override
-    public void delete(int id) {
+    public void delete(long id) {
         jdbcTemplate.update("DELETE FROM projects WHERE id = ?;", id);
     }
 }
