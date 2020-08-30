@@ -1,7 +1,5 @@
 package org.example.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.dao.ProjectDao;
 import org.example.dto.ProjectDto;
 import org.slf4j.Logger;
