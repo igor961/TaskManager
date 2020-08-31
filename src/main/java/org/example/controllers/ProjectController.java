@@ -44,12 +44,15 @@ public class ProjectController {
     @MessageMapping("/project/update")
     @SendToUser("/queue/project")
     public void update(@Payload ProjectDto project) {
+        logger.info("Update project");
+        logger.info("Project: " + project);
         dao.update(project);
     }
 
     @MessageMapping("/project/delete/{id}")
     @SendToUser("/queue/project")
     public void delete(@DestinationVariable long id) {
+        logger.info("Delete project");
         dao.delete(id);
     }
 
