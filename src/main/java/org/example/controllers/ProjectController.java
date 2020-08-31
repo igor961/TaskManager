@@ -43,13 +43,13 @@ public class ProjectController {
 
     @MessageMapping("/project/update")
     @SendToUser("/queue/project")
-    public void update(ProjectDto project) {
+    public void update(@Payload ProjectDto project) {
         dao.update(project);
     }
 
-    @MessageMapping("/project/delete")
+    @MessageMapping("/project/delete/{id}")
     @SendToUser("/queue/project")
-    public void delete(long id) {
+    public void delete(@DestinationVariable long id) {
         dao.delete(id);
     }
 
