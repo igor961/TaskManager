@@ -65,7 +65,7 @@ public class TaskDao implements BasicDao<TaskDto> {
 
     @Override
     public void update(TaskDto task) {
-        jdbcTemplate.update("UPDATE tasks SET name = ? WHERE id = ?;", task.name, task.id);
+        jdbcTemplate.update("UPDATE tasks SET name = ?, status = ? WHERE id = ?;", task.name, task.status, task.id);
     }
 
     @Override
