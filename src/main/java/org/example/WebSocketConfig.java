@@ -34,5 +34,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                         return new UserPrincipal(UUID.randomUUID().toString());
                     }
                 });
+        registry.addEndpoint("/api")
+                .setAllowedOrigins("*")
+                .setHandshakeHandler(new DefaultHandshakeHandler() {
+                    @Override
+                    protected Principal determineUser(ServerHttpRequest request, WebSocketHandler wsHandler, Map<String, Object> attributes) {
+                        return new UserPrincipal(UUID.randomUUID().toString());
+                    }
+                }).withSockJS();
     }
 }
