@@ -1,5 +1,7 @@
 package org.example.dto;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -18,10 +20,11 @@ public class TaskDto implements Serializable {
         this.projectName = projectName;
     }
 
-    public TaskDto(String name, Boolean status, long projectId) {
+    @JsonCreator
+    public TaskDto(String name, long projectId) {
         this.id = 0;
         this.name = name;
-        this.status = status;
+        this.status = false;
         this.projectId = projectId;
         this.projectName = null;
     }

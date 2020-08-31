@@ -1,5 +1,6 @@
 package org.example.dto;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonRawValue;
 
 import java.io.Serializable;
@@ -17,6 +18,7 @@ public class ProjectDto implements Serializable {
         this.tasks = null;
     }
 
+    @JsonCreator
     public ProjectDto(String name) {
         this.id = 0;
         this.name = name;

@@ -32,10 +32,6 @@ public class TaskDao implements BasicDao<TaskDto> {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    /*public List<TaskDto> getByProjectId(long id) {
-        return
-    }*/
-
     @Override
     public Optional<TaskDto> get(long id) {
         Task res = jdbcTemplate.queryForObject(
@@ -69,11 +65,11 @@ public class TaskDao implements BasicDao<TaskDto> {
 
     @Override
     public void update(TaskDto task) {
-        jdbcTemplate.update("UPDATE tasks SET name = ? WHERE id = ?;", task.name, task.id);
+        jdbcTemplate.update("UPDATE tasks SET name = ?, status = ? WHERE id = ?;", task.name, task.status, task.id);
     }
 
     @Override
-    public void delete(int id) {
+    public void delete(long id) {
         jdbcTemplate.update("DELETE FROM tasks WHERE id = ?;", id);
     }
 }
