@@ -11,7 +11,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
-@ActiveProfiles("test")
 class TaskDaoTest {
 
     @Autowired
@@ -22,7 +21,7 @@ class TaskDaoTest {
     public void save() {
         String name = "test10";
         long expectedQ = dao.getAll().stream().filter(e -> e.name.equals(name)).count() + 1;
-        TaskDto p = new TaskDto(name, false, 43);
+        TaskDto p = new TaskDto(name, 43);
         dao.save(p);
         List<TaskDto> aux = dao.getAll();
         long realQ = aux.stream().filter(e -> e.name.equals(name)).count();
