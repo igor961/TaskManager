@@ -7,7 +7,7 @@ public class TaskMapper implements ModelMapper<Task, TaskDto> {
 
     @Override
     public TaskDto getDto(Task task) {
-        return new TaskDto(task.id, task.name, task.status, task.project.id, task.project.name);
+        return new TaskDto(task.id, task.name, task.status, task.project.id, task.project.name, task.priority);
     }
 
 }

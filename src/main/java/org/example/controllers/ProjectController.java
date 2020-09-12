@@ -70,8 +70,6 @@ public class ProjectController {
         return "hello";
     }
 
-
-
     @MessageExceptionHandler
     @SendToUser("/queue/errors")
     public String handleException(Throwable exception) {

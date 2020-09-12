@@ -94,6 +94,12 @@ ALTER TABLE ONLY public.tasks
     ADD CONSTRAINT fk_project_id FOREIGN KEY (project_id) REFERENCES public.projects(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
 
 
+ALTER TABLE public.tasks
+   ADD COLUMN priority integer;
+
+
+
+
 --
 -- PostgreSQL database dump complete
 --

@@ -21,7 +21,7 @@ class TaskDaoTest {
     public void save() {
         String name = "test10";
         long expectedQ = dao.getAll().stream().filter(e -> e.name.equals(name)).count() + 1;
-        TaskDto p = new TaskDto(name, 43);
+        TaskDto p = new TaskDto(name, 1, 43);
         dao.save(p);
         List<TaskDto> aux = dao.getAll();
         long realQ = aux.stream().filter(e -> e.name.equals(name)).count();

@@ -24,7 +24,8 @@ public class TaskDao implements BasicDao<TaskDto> {
     private final RowMapper<Task> rowMapper = (rs, i) -> new Task(rs.getLong("id"),
             rs.getString("name"),
             rs.getBoolean("status"),
-            new Project(rs.getLong("project_id"), rs.getString("project_name")));
+            new Project(rs.getLong("project_id"), rs.getString("project_name")),
+            rs.getInt("priority"));
 
     private final TaskMapper modelMapper = new TaskMapper();
 
@@ -54,13 +55,14 @@ public class TaskDao implements BasicDao<TaskDto> {
     public TaskDto save(TaskDto task) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(con -> {
-            PreparedStatement ps = con.prepareStatement("INSERT INTO tasks (name, status, project_id) VALUES (?, ?, ?);", Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = con.prepareStatement("INSERT INTO tasks (name, status, project_id, priority) VALUES (?, ?, ?, ?);", Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, task.name);
             ps.setBoolean(2, task.status);
             ps.setLong(3, task.projectId);
+            ps.setInt(4, task.priority);
             return ps;
         }, keyHolder);
-        return new TaskDto((int) keyHolder.getKeys().get("id"), task.name, task.status, task.projectId, task.projectName);
+        return new TaskDto((int) keyHolder.getKeys().get("id"), task.name, task.status, task.projectId, task.projectName, task.priority);
     }
 
     @Override
