@@ -45,7 +45,7 @@ public class TaskDao implements BasicDao<TaskDto> {
 
     @Override
     public List<TaskDto> getAll() {
-        return jdbcTemplate.query("SELECT t.*, p.name as project_name FROM tasks t LEFT JOIN projects p ON p.id = t.project_id;", rowMapper)
+        return jdbcTemplate.query("SELECT t.*, p.name as project_name FROM tasks t LEFT JOIN projects p ON p.id = t.project_id ORDER BY t.priority;", rowMapper)
                 .stream()
                 .map(modelMapper::getDto)
                 .collect(Collectors.toList());
