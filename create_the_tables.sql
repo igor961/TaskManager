@@ -95,7 +95,7 @@ ALTER TABLE ONLY public.tasks
 
 
 ALTER TABLE public.tasks
-   ADD COLUMN priority integer;
+   ADD COLUMN priority integer DEFAULT 1;
 
 
 
