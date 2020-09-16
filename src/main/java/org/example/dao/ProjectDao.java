@@ -21,7 +21,7 @@ public class ProjectDao implements BasicDao<ProjectDto> {
 
     public List<ProjectDto> getProjectsWithTasks() {
         String query = "WITH max_id AS (SELECT MAX(id) FROM tasks), " +
-                "next_ids AS (SELECT id, lead(get_aux_id_for_tasks(priority, id, (select * from max_id))) OVER (PARTITION BY project_id ORDER BY priority) as next_id FROM tasks)" +
+                "next_ids AS (SELECT id, lead(get_aux_id_for_tasks(priority, id, (select * from max_id))) OVER (PARTITION BY project_id ORDER BY priority, id) as next_id FROM tasks)" +
                 "SELECT p.id, p.name, json_object_agg(" +
                 "get_aux_id_for_tasks(t.priority, t.id, (select * from max_id)), " +
                 "to_jsonb(t.*) #- '{project_id}' || jsonb_build_object(" +

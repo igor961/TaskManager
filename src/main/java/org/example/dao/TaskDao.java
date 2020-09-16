@@ -23,7 +23,7 @@ public class TaskDao implements BasicDao<TaskDto> {
 
     public TaskDto get(long id) {
         return jdbcTemplate.queryForObject(
-                "SELECT t.id, t.name, t.status, t.priority, t.project_id, p.name as project_name, get_aux_id_for_tasks(t.priority, t.id, (SELECT max(id) FROM tasks)) as aux_id FROM tasks t INNER JOIN projects p ON p.id = t.project_id WHERE t.id = ?;",
+                "SELECT t.*, p.name as project_name, get_aux_id_for_tasks(t.priority, t.id, (SELECT max(id) FROM tasks)) as aux_id FROM tasks t INNER JOIN projects p ON p.id = t.project_id WHERE t.id = ?;",
                 new Object[]{id},
                 (rs, i) -> new TaskDto(rs.getLong("id"),
                         rs.getString("name"),
