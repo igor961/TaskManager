@@ -94,6 +94,31 @@ ALTER TABLE ONLY public.tasks
     ADD CONSTRAINT fk_project_id FOREIGN KEY (project_id) REFERENCES public.projects(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
 
 
+ALTER TABLE public.tasks
+   ADD COLUMN priority integer DEFAULT 1;
+
+
+CREATE OR REPLACE FUNCTION public.get_aux_id_for_tasks(
+	priority integer,
+	cur_id integer,
+	max_id integer)
+    RETURNS text
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE
+AS $BODY$
+declare
+   compl integer;
+begin
+   SELECT floor(pow(10, log(max_id)-log(cur_id)))
+   INTO compl
+   FROM tasks;
+
+   return concat(priority, compl, cur_id);
+end;
+$BODY$;
+
 --
 -- PostgreSQL database dump complete
 --

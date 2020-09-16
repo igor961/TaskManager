@@ -2,6 +2,7 @@ package org.example.controllers;
 
 import org.example.dao.ProjectDao;
 import org.example.dto.ProjectDto;
+import org.example.dto.TasksBatchDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +14,6 @@ import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
 
 import java.util.List;
-import java.util.Optional;
 
 @Controller
 public class ProjectController {
@@ -28,7 +28,7 @@ public class ProjectController {
 
     @MessageMapping("/project/{id}")
     @SendToUser("/queue/project")
-    public Optional<ProjectDto> get(@DestinationVariable long id) {
+    public ProjectDto get(@DestinationVariable long id) {
         logger.info("Get project by id");
         return dao.get(id);
     }
@@ -42,7 +42,6 @@ public class ProjectController {
     }
 
     @MessageMapping("/project/update")
-    @SendToUser("/queue/project")
     public void update(@Payload ProjectDto project) {
         logger.info("Update project");
         logger.info("Project: " + project);
@@ -50,7 +49,6 @@ public class ProjectController {
     }
 
     @MessageMapping("/project/delete/{id}")
-    @SendToUser("/queue/project")
     public void delete(@DestinationVariable long id) {
         logger.info("Delete project");
         dao.delete(id);
@@ -63,14 +61,18 @@ public class ProjectController {
         return dao.getProjectsWithTasks();
     }
 
+    @MessageMapping("/project/batch")
+    public void saveTasks(@Payload TasksBatchDto project) throws Exception {
+        logger.info("Update tasks for project");
+        dao.saveTasks(project);
+    }
+
     @MessageMapping("/test")
     @SendToUser("/queue/reply")
     public String hello(@Payload String m) throws Exception {
         logger.info(m);
         return "hello";
     }
-
-
 
     @MessageExceptionHandler
     @SendToUser("/queue/errors")
