@@ -1,59 +1,74 @@
 package org.example.dao;
 
 import org.example.dto.ProjectDto;
-import org.example.dto.mappers.ModelMapper;
-import org.example.entities.Project;
+import org.example.dto.TasksBatchDto;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Repository
 public class ProjectDao implements BasicDao<ProjectDto> {
     private final JdbcTemplate jdbcTemplate;
-
-    private final RowMapper<Project> rowMapper = (rs, i) -> new Project(
-            rs.getLong("project_id"),
-            rs.getString("name"));
-
-    private final ModelMapper<Project, ProjectDto> modelMapper = (Project project) -> new ProjectDto(project.id, project.name);
 
     public ProjectDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
     public List<ProjectDto> getProjectsWithTasks() {
-        return jdbcTemplate.query("SELECT p.id, p.name, json_object_agg(t.id, t.*) as tasks FROM tasks t INNER JOIN projects p ON p.id = t.project_id GROUP BY p.id, p.name;",
+        String query = "WITH max_id AS (SELECT MAX(id) FROM tasks), " +
+                "next_ids AS (SELECT id, lead(get_aux_id_for_tasks(priority, id, (select * from max_id))) OVER (PARTITION BY project_id ORDER BY priority) as next_id FROM tasks)" +
+                "SELECT p.id, p.name, json_object_agg(" +
+                "get_aux_id_for_tasks(t.priority, t.id, (select * from max_id)), " +
+                "to_jsonb(t.*) #- '{project_id}' || jsonb_build_object(" +
+                "'projectId', t.project_id, " +
+                "'auxId', get_aux_id_for_tasks(t.priority, t.id, (select * from max_id)), " +
+                "'nextId', (SELECT res.next_id FROM next_ids as res WHERE res.id = t.id)" +
+                ") " +
+                "order by t.priority) as tasks " +
+                "FROM tasks t INNER JOIN projects p ON p.id = t.project_id " +
+                "GROUP BY p.id, p.name;";
+        return jdbcTemplate.query(query,
                 (rs, i) -> new ProjectDto(
                         rs.getLong("id"),
                         rs.getString("name"),
                         rs.getString("tasks")));
     }
 
-    @Override
-    public Optional<ProjectDto> get(long id) {
-        Project res = jdbcTemplate.queryForObject(
-                "SELECT id as project_id, name from projects WHERE id = ?;",
-                new Object[]{id},
-                new int[]{Types.INTEGER},
-                rowMapper);
-        return Optional.ofNullable(modelMapper.getDto(res));
+    public void saveTasks(TasksBatchDto project) {
+        this.jdbcTemplate.batchUpdate(
+                "UPDATE tasks SET name = ?, status = ?, priority = ? WHERE id = ?;",
+                new BatchPreparedStatementSetter() {
+                    @Override
+                    public void setValues(PreparedStatement ps, int i) throws SQLException {
+                        var task = project.tasks.get(i);
+                        ps.setString(1, task.name);
+                        ps.setBoolean(2, task.status);
+                        ps.setInt(3, task.priority);
+                        ps.setLong(4, task.id);
+                    }
+
+                    @Override
+                    public int getBatchSize() {
+                        return project.getSize();
+                    }
+                });
     }
 
     @Override
-    public List<ProjectDto> getAll() {
-        return jdbcTemplate.query("SELECT id as project_id, name from projects;", rowMapper)
-                .stream()
-                .map(modelMapper::getDto)
-                .collect(Collectors.toList());
+    public ProjectDto get(long id) {
+        return jdbcTemplate.queryForObject(
+                "SELECT id as project_id, name from projects WHERE id = ?;",
+                new Object[]{id},
+                new int[]{Types.INTEGER},
+                ((rs, rowNum) -> new ProjectDto(rs.getLong("id"), rs.getString("name"))));
     }
 
     @Override

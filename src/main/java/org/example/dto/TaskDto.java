@@ -12,14 +12,16 @@ public class TaskDto implements Serializable {
     public final long projectId;
     public final String projectName;
     public final int priority;
+    public final long auxId;
 
-    public TaskDto(long id, String name, Boolean status, long projectId, String projectName, int priority) {
+    public TaskDto(long id, String name, Boolean status, long projectId, String projectName, int priority, long auxId) {
         this.id = id;
         this.name = name;
         this.status = status;
         this.projectId = projectId;
         this.projectName = projectName;
         this.priority = priority;
+        this.auxId = auxId;
     }
 
     @JsonCreator
@@ -30,6 +32,7 @@ public class TaskDto implements Serializable {
         this.projectId = projectId;
         this.projectName = null;
         this.priority = priority;
+        this.auxId = 0;
     }
 
     @Override
