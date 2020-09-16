@@ -2,7 +2,6 @@ package org.example.controllers;
 
 import org.example.dao.ProjectDao;
 import org.example.dto.ProjectDto;
-import org.example.dto.TasksBatchDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,12 +58,6 @@ public class ProjectController {
     public List<ProjectDto> all() throws Exception {
         logger.info("Get all projects with tasks");
         return dao.getProjectsWithTasks();
-    }
-
-    @MessageMapping("/project/batch")
-    public void saveTasks(@Payload TasksBatchDto project) throws Exception {
-        logger.info("Update tasks for project");
-        dao.saveTasks(project);
     }
 
     @MessageMapping("/test")

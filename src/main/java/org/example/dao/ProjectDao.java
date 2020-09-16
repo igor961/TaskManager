@@ -1,15 +1,12 @@
 package org.example.dao;
 
 import org.example.dto.ProjectDto;
-import org.example.dto.TasksBatchDto;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.List;
@@ -40,25 +37,6 @@ public class ProjectDao implements BasicDao<ProjectDto> {
                         rs.getLong("id"),
                         rs.getString("name"),
                         rs.getString("tasks")));
-    }
-
-    public void saveTasks(TasksBatchDto project) {
-        this.jdbcTemplate.batchUpdate(
-                "UPDATE tasks SET status = COALESCE(?, status), priority = ? WHERE id = ?;",
-                new BatchPreparedStatementSetter() {
-                    @Override
-                    public void setValues(PreparedStatement ps, int i) throws SQLException {
-                        var task = project.tasks.get(i);
-                        ps.setBoolean(1, task.status);
-                        ps.setInt(2, task.priority);
-                        ps.setLong(3, task.id);
-                    }
-
-                    @Override
-                    public int getBatchSize() {
-                        return project.getSize();
-                    }
-                });
     }
 
     @Override

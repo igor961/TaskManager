@@ -1,13 +1,17 @@
 package org.example.dao;
 
 import org.example.dto.TaskDto;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.sql.Statement;
+
+import java.util.List;
 
 @Repository
 public class TaskDao implements BasicDao<TaskDto> {
@@ -46,6 +50,25 @@ public class TaskDao implements BasicDao<TaskDto> {
             return ps;
         }, keyHolder);
         return this.get(Long.parseLong(keyHolder.getKeys().get("id").toString()));
+    }
+
+    public void saveTasks(List<TaskDto> batch) {
+        this.jdbcTemplate.batchUpdate(
+                "UPDATE tasks SET status = COALESCE(?, status), priority = ? WHERE id = ?;",
+                new BatchPreparedStatementSetter() {
+                    @Override
+                    public void setValues(PreparedStatement ps, int i) throws SQLException {
+                        var task = batch.get(i);
+                        ps.setBoolean(1, task.status);
+                        ps.setInt(2, task.priority);
+                        ps.setLong(3, task.id);
+                    }
+
+                    @Override
+                    public int getBatchSize() {
+                        return batch.size();
+                    }
+                });
     }
 
     @Override
