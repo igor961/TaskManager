@@ -27,7 +27,8 @@ public class TaskDao implements BasicDao<TaskDto> {
                         rs.getLong("project_id"),
                         rs.getString("project_name"),
                         rs.getInt("priority"),
-                        rs.getLong("aux_id")));
+                        rs.getLong("aux_id"),
+                        rs.getTimestamp("term")));
     }
 
 
@@ -49,7 +50,12 @@ public class TaskDao implements BasicDao<TaskDto> {
 
     @Override
     public void update(TaskDto task) {
-        jdbcTemplate.update("UPDATE tasks SET name = ?, status = ?, priority = ? WHERE id = ?;", task.name, task.status, task.priority, task.id);
+        jdbcTemplate.update(
+                "UPDATE tasks SET name = COALESCE(?, name), " +
+                        "status = COALESCE(?, status), " +
+                        "priority = COALESCE(?, priority), " +
+                        "term = COALESCE(?, term) WHERE id = ?;",
+                task.name, task.status, task.priority, task.term, task.id);
     }
 
     @Override

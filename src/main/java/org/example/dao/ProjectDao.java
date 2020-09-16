@@ -44,15 +44,14 @@ public class ProjectDao implements BasicDao<ProjectDto> {
 
     public void saveTasks(TasksBatchDto project) {
         this.jdbcTemplate.batchUpdate(
-                "UPDATE tasks SET name = ?, status = ?, priority = ? WHERE id = ?;",
+                "UPDATE tasks SET status = COALESCE(?, status), priority = ? WHERE id = ?;",
                 new BatchPreparedStatementSetter() {
                     @Override
                     public void setValues(PreparedStatement ps, int i) throws SQLException {
                         var task = project.tasks.get(i);
-                        ps.setString(1, task.name);
-                        ps.setBoolean(2, task.status);
-                        ps.setInt(3, task.priority);
-                        ps.setLong(4, task.id);
+                        ps.setBoolean(1, task.status);
+                        ps.setInt(2, task.priority);
+                        ps.setLong(3, task.id);
                     }
 
                     @Override

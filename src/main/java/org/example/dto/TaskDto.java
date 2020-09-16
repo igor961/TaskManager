@@ -3,6 +3,7 @@ package org.example.dto;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.Objects;
 
 public class TaskDto implements Serializable {
@@ -13,8 +14,9 @@ public class TaskDto implements Serializable {
     public final String projectName;
     public final int priority;
     public final long auxId;
+    public final Timestamp term;
 
-    public TaskDto(long id, String name, Boolean status, long projectId, String projectName, int priority, long auxId) {
+    public TaskDto(long id, String name, Boolean status, long projectId, String projectName, int priority, long auxId, Timestamp term) {
         this.id = id;
         this.name = name;
         this.status = status;
@@ -22,17 +24,19 @@ public class TaskDto implements Serializable {
         this.projectName = projectName;
         this.priority = priority;
         this.auxId = auxId;
+        this.term = term;
     }
 
     @JsonCreator
-    public TaskDto(String name, int priority, long projectId) {
+    public TaskDto(String name, long projectId) {
         this.id = 0;
         this.name = name;
         this.status = false;
         this.projectId = projectId;
         this.projectName = null;
-        this.priority = priority;
+        this.priority = 1;
         this.auxId = 0;
+        this.term = null;
     }
 
     @Override

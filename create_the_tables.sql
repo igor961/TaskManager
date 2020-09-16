@@ -119,6 +119,9 @@ begin
 end;
 $BODY$;
 
+ALTER TABLE public.tasks
+    ADD COLUMN term timestamp without time zone;
+
 --
 -- PostgreSQL database dump complete
 --
