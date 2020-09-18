@@ -9,6 +9,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
+import java.util.List;
 
 @Controller
 public class TaskController {
@@ -23,6 +24,11 @@ public class TaskController {
     @SendToUser("/queue/task")
     public TaskDto save(@Payload TaskDto task) {
         return dao.save(task);
+    }
+
+    @MessageMapping("/task/batch")
+    public void saveTasks(@Payload List<TaskDto> project) throws Exception {
+        dao.saveTasks(project);
     }
 
     @MessageMapping("/task/update")

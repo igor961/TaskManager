@@ -1,15 +1,12 @@
 package org.example.dao;
 
 import org.example.dto.ProjectDto;
-import org.example.dto.TasksBatchDto;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.List;
@@ -24,7 +21,7 @@ public class ProjectDao implements BasicDao<ProjectDto> {
 
     public List<ProjectDto> getProjectsWithTasks() {
         String query = "WITH max_id AS (SELECT MAX(id) FROM tasks), " +
-                "next_ids AS (SELECT id, lead(get_aux_id_for_tasks(priority, id, (select * from max_id))) OVER (PARTITION BY project_id ORDER BY priority) as next_id FROM tasks)" +
+                "next_ids AS (SELECT id, lead(get_aux_id_for_tasks(priority, id, (select * from max_id))) OVER (PARTITION BY project_id ORDER BY priority, id) as next_id FROM tasks)" +
                 "SELECT p.id, p.name, json_object_agg(" +
                 "get_aux_id_for_tasks(t.priority, t.id, (select * from max_id)), " +
                 "to_jsonb(t.*) #- '{project_id}' || jsonb_build_object(" +
@@ -40,26 +37,6 @@ public class ProjectDao implements BasicDao<ProjectDto> {
                         rs.getLong("id"),
                         rs.getString("name"),
                         rs.getString("tasks")));
-    }
-
-    public void saveTasks(TasksBatchDto project) {
-        this.jdbcTemplate.batchUpdate(
-                "UPDATE tasks SET name = ?, status = ?, priority = ? WHERE id = ?;",
-                new BatchPreparedStatementSetter() {
-                    @Override
-                    public void setValues(PreparedStatement ps, int i) throws SQLException {
-                        var task = project.tasks.get(i);
-                        ps.setString(1, task.name);
-                        ps.setBoolean(2, task.status);
-                        ps.setInt(3, task.priority);
-                        ps.setLong(4, task.id);
-                    }
-
-                    @Override
-                    public int getBatchSize() {
-                        return project.getSize();
-                    }
-                });
     }
 
     @Override
