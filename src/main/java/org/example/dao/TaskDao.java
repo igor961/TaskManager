@@ -77,7 +77,7 @@ public class TaskDao implements BasicDao<TaskDto> {
                 "UPDATE tasks SET name = COALESCE(?, name), " +
                         "status = COALESCE(?, status), " +
                         "priority = COALESCE(?, priority), " +
-                        "term = COALESCE(?, term) WHERE id = ?;",
+                        "term = ? WHERE id = ?;",
                 task.name, task.status, task.priority, task.term, task.id);
     }
 
